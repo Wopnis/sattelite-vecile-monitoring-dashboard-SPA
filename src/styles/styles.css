@@ -1,0 +1,239 @@
+/* ==========================================================================
+   Styles for SPA Monitoring Dashboard — large-readable operator UI
+   ==========================================================================
+   - Крупные поля ввода
+   - Чёткие разделы (left/right)
+   - Красивая панель вкладок
+   - Акцент для активных/закрытых тревог
+   - Карточки, тени, приятная палитра
+   ========================================================================== */
+
+/* Reset-ish */
+* { box-sizing: border-box; }
+html,body { height:100%; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: linear-gradient(180deg, #f6f8fb 0%, #eef2f6 100%);
+  color: #1f2937;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height: 1.35;
+  font-size: 15px;
+}
+
+/* Top tabs container (dark strip) */
+#tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: #111827; /* deep */
+  border-bottom: 1px solid rgba(0,0,0,0.12);
+}
+
+/* Visual tab bar (buttons) */
+.tabbar { display:flex; gap:8px; align-items:center; }
+.tab-btn {
+  background: #fff;
+  color: #111827;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.03);
+  transition: transform .08s ease, box-shadow .08s ease, background .12s ease;
+}
+.tab-btn:hover { transform: translateY(-2px); }
+.tab-btn.active {
+  background: linear-gradient(180deg,#ffffff 0%, #f7fbff 100%);
+  border-color: #9fb7ff;
+  box-shadow: 0 8px 28px rgba(46,101,255,0.08);
+}
+
+/* main app wrapper */
+#app {
+  padding: 18px;
+  max-width: 1300px;
+  margin: 14px auto;
+}
+
+/* layout with left and right panels */
+.layout {
+  display: grid;
+  grid-template-columns: 480px 1fr; /* left fixed-ish, right flexible */
+  gap: 18px;
+  align-items: start;
+}
+
+/* panel surface */
+.left, .right {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 8px 30px rgba(16,24,40,0.04);
+  border: 1px solid rgba(15,23,42,0.04);
+}
+
+/* left width tweak for smaller screens */
+@media (max-width: 920px) {
+  .layout { grid-template-columns: 1fr; }
+  .left, .right { padding: 12px; }
+}
+
+/* Form rows and labels */
+.form-row {
+  display: block;
+  margin-bottom: 12px;
+}
+.form-row label {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:600;
+  color:#334155;
+  margin-bottom:6px;
+  font-size:14px;
+}
+.form-row input[type="text"],
+.form-row input[type="password"],
+.form-row input,
+.form-row textarea,
+.template-select,
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e6e9ee;
+  border-radius: 8px;
+  background: #fbfdff;
+  font-size: 15px;
+  color: #0f1724;
+  outline: none;
+  transition: box-shadow .12s ease, border-color .12s ease;
+}
+.form-row textarea { min-height: 110px; resize: vertical; }
+.form-row input:focus,
+.form-row textarea:focus,
+.template-select:focus {
+  border-color: #5b9dff;
+  box-shadow: 0 8px 20px rgba(91,157,255,0.08);
+}
+
+/* Buttons */
+.row { display:flex; gap:8px; align-items:center; }
+.btn {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight:700;
+  color: white;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+  transition: transform .08s ease, box-shadow .12s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { background:#4c7cff; }
+.btn.success { background:#2aa44f; }
+.btn.warn { background:#ff8a3c; }
+.btn.ghost { background:transparent; color:#374151; border:1px solid #e6e9ee; box-shadow:none; }
+
+/* Page title */
+.page-title { font-size:18px; font-weight:800; margin-bottom:12px; color:#0f1724; }
+
+/* Right column preview area (big) */
+.right .card-preview {
+  min-height: 520px;
+  padding: 12px;
+  border-radius:8px;
+  border:1px dashed rgba(15,23,42,0.04);
+  background: linear-gradient(180deg,#fff 0%, #fbfdff 100%);
+}
+
+/* Alarm list styles (if used in right column) */
+.alarm-list {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.alarm-item {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  padding:12px;
+  border-radius:10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(250,250,252,0.9));
+  border: 1px solid rgba(15,23,42,0.03);
+  transition: transform .06s ease, box-shadow .08s ease;
+  cursor: pointer;
+}
+.alarm-item:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(3,10,44,0.06); }
+
+/* Active / Open alarms — soft translucent red background */
+.alarm-item:not(.closed) {
+  background: linear-gradient(180deg, rgba(255,245,247,0.85), rgba(255,238,240,0.65));
+  border-left: 4px solid rgba(255,94,87,0.9);
+}
+
+/* Closed alarms — translucent gray */
+.alarm-item.closed {
+  background: linear-gradient(180deg, rgba(250,250,250,0.85), rgba(245,245,246,0.9));
+  color: #6b7280;
+  border-left: 4px solid rgba(156,163,175,0.6);
+  opacity: 0.95;
+}
+
+/* Left side form area tweaks */
+.left .form-section {
+  display:block;
+}
+.left .actions {
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+
+/* Message page tweaks */
+.messages-page {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.template-select { font-size:15px; padding:10px 12px; border-radius:8px; }
+.message-editor { min-height: 320px; padding:12px; font-size:15px; border-radius:8px; }
+
+/* Garage list/card */
+.vehicle-list { display:flex; flex-direction:column; gap:8px; }
+.vehicle-row {
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #eef2f7;
+  background:#fbfdff;
+  cursor:pointer;
+}
+.vehicle-row:hover { background:#f4f7fb; }
+
+/* Vehicle card */
+.vehicle-card h2 { margin:0 0 12px 0; font-size:18px; }
+.media-grid { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.media-thumb { width:120px; height:80px; border-radius:6px; overflow:hidden; position:relative; border:1px solid #eef2f7; background:#fff; }
+.media-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.media-thumb .delete { position:absolute; right:6px; top:6px; background:rgba(0,0,0,0.5); color:white; padding:2px 6px; border-radius:6px; cursor:pointer; font-size:12px; }
+
+/* small typography helpers */
+.kv { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
+.kv b { width:120px; color:#334155; }
+
+/* Tiny error/ui states */
+.input-error { border-color: #ff6b6b !important; box-shadow: 0 6px 18px rgba(255,107,107,0.06); }
+.input-error-text { color:#b91c1c; font-size:13px; margin-top:6px; }
+
+/* Footer (if any) */
+.footer { margin-top:20px; font-size:13px; color:#6b7280; text-align:center; }
+
+/* Helpers for compact controls */
+.row-gap { display:flex; gap:8px; align-items:center; }
