@@ -1,0 +1,331 @@
+/* =========================
+   БАЗА
+========================= */
+
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #121212;
+  color: #eaeaea;
+  font-size: 15px;
+}
+
+h1, h2, h3, h4 {
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+/* =========================
+   КНОПКИ
+========================= */
+
+.btn {
+  background: #2f2f2f;
+  color: #fff;
+  transition: 0.15s;
+}
+
+.btn:hover {
+  background: #444;
+}
+
+.btn.primary {
+  background: #1976d2;
+}
+
+.btn.primary:hover {
+  background: #1e88e5;
+}
+
+.btn.warn {
+  background: #c62828;
+}
+
+.btn.warn:hover {
+  background: #e53935;
+}
+
+.btn.ghost {
+  background: transparent;
+  border: 1px solid #555;
+}
+
+/* =========================
+   ПОЛЯ ВВОДА
+========================= */
+
+input,
+select,
+textarea {
+  width: 100%;
+  background: #1e1e1e;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 15px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+/* =========================
+   ВЕРСТКА ВКЛАДОК
+========================= */
+
+.tabs {
+  display: flex;
+  background: #1a1a1a;
+  padding: 6px;
+  gap: 6px;
+  border-bottom: 1px solid #333;
+}
+
+.tab-button {
+  background: #2a2a2a;
+  color: #ccc;
+  padding: 10px 16px;
+  border-radius: 8px 8px 0 0;
+}
+
+.tab-button.active {
+  background: #1976d2;
+  color: #fff;
+}
+
+.app {
+  padding: 12px;
+}
+
+/* =========================
+   ДВУХКОЛОНОЧНАЯ СХЕМА
+========================= */
+
+.layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 12px;
+}
+
+.left,
+.right {
+  background: #1a1a1a;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+/* =========================
+   ТРЕВОГИ
+========================= */
+
+.alarm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alarm-item {
+  background: rgba(200, 50, 50, 0.25);
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  border: 1px solid rgba(200, 50, 50, 0.4);
+}
+
+.alarm-item.closed {
+  background: rgba(120, 120, 120, 0.25);
+  border-color: rgba(130, 130, 130, 0.4);
+}
+
+.alarm-item:hover {
+  transform: scale(1.01);
+}
+
+.alarm-item .small {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+/* =========================
+   СООБЩЕНИЯ
+========================= */
+
+.messages-page {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.current-alarm-box {
+  background: #222;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.alarm-value {
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+.message-textarea {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.message-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* =========================
+   ГАРАЖ
+========================= */
+
+.vehicle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vehicle-row {
+  background: #222;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.vehicle-row:hover {
+  background: #333;
+}
+
+.vehicle-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 80px);
+  gap: 8px;
+}
+
+.media-thumb {
+  position: relative;
+}
+
+.media-thumb img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.media-thumb .delete {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* =========================
+   МОДАЛЬНЫЕ ОКНА — ТОЛЬКО ЗДЕСЬ
+========================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #1e1e1e;
+  color: #fff;
+  border-radius: 10px;
+  padding: 18px;
+  min-width: 340px;
+  max-width: 640px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+}
+
+/* ============================= */
+/* ===== ВЕРХНЯЯ ПАНЕЛЬ ======== */
+/* ============================= */
+
+#tabs {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background: #1e1e1e;
+  border-bottom: 1px solid #333;
+}
+
+/* кнопки вкладок */
+#tabs button {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ccc;
+  transition: 0.2s ease;
+}
+
+/* разные цвета вкладок */
+#tabs button[data-route="alarms"] {
+  background: #642424;
+}
+#tabs button[data-route="messages"] {
+  background: #243964;
+}
+#tabs button[data-route="garage"] {
+  background: #245a3a;
+}
+
+/* ховер */
+#tabs button:hover {
+  filter: brightness(1.2);
+  color: #fff;
+}
+
+/* ✅ АКТИВНАЯ ВКЛАДКА */
+#tabs button.active {
+  background: #ffffff !important;
+  color: #000 !important;
+  box-shadow: 0 0 0 2px #00000055 inset;
+  cursor: default;
+}

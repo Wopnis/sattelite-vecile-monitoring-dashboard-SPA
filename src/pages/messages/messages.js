@@ -1,119 +1,132 @@
 import { el } from '../../utils/dom.js'
 import { getTemplates } from '../../modules/templates/templates.store.js'
+import { getSelectedAlarm, setSelectedAlarm } from '../../store.js'
 
-export default {
+const MessagesPage = {
   render() {
     const root = el('div', { class: 'messages-page' })
 
     const title = el('h2', {}, '📨 Сообщения')
 
-    // ✅ Блок данных выбранной тревоги
-    const infoBlock = el('div', { class: 'card-preview' },
-      el('div', { class: 'kv' }, el('b', {}, 'VIN:'), el('span', { id: 'msg_vin' }, '—')),
-      el('div', { class: 'kv' }, el('b', {}, 'Договор:'), el('span', { id: 'msg_contract' }, '—')),
-      el('div', { class: 'kv' }, el('b', {}, 'Марка:'), el('span', { id: 'msg_brand' }, '—'))
+    // ===== БЛОК ВЫБРАННОЙ ТРЕВОГИ =====
+    const info = el('div', { class: 'current-alarm-box' })
+
+    const brandEl = el('span', { class: 'alarm-value' }, '—')
+    const vinEl = el('span', { class: 'alarm-value' }, '—')
+    const contractEl = el('span', { class: 'alarm-value' }, '—')
+
+    info.append(
+      el('div', {}, ['Марка: ', brandEl]),
+      el('div', {}, ['VIN: ', vinEl]),
+      el('div', {}, ['Договор: ', contractEl])
     )
 
-    // ✅ Шаблоны
+    // ===== ШАБЛОНЫ =====
     const templates = getTemplates()
 
-    const tplSelect = el('select', { class: 'template-select' })
-    tplSelect.appendChild(el('option', { value: '' }, '— Выберите шаблон —'))
-
-    templates.forEach(t => {
-      tplSelect.appendChild(
+    const select = el(
+      'select',
+      { class: 'input' },
+      el('option', { value: '' }, '— Выберите шаблон —'),
+      ...templates.map(t =>
         el('option', { value: t.id }, t.title)
       )
-    })
-
-    // ✅ Кнопки
-    const buildBtn = el('button', { class: 'btn primary' }, '📨 Сформировать сообщение')
-    const copyBtn = el('button', { class: 'btn success' }, '📋 Копировать и очистить')
-    const clearBtn = el('button', { class: 'btn ghost' }, '🧹 Очистить')
+    )
 
     const textarea = el('textarea', {
-      class: 'message-editor',
-      placeholder: 'Текст сообщения...'
+      class: 'message-textarea',
+      rows: 10,
+      placeholder: 'Текст сообщения...',
     })
 
-    // ✅ Текущая выбранная тревога
+    // ===== КНОПКИ =====
+    const btnGenerate = el('button', { class: 'btn primary' }, '📨 Сформировать сообщение')
+    const btnClear = el('button', { class: 'btn ghost' }, '🧹 Очистить')
+
+    const buttons = el('div', { class: 'message-buttons' }, btnGenerate, btnClear)
+
+    // ===== ЛОГИКА =====
     let currentAlarm = null
 
-    // ✅ Подстановка переменных в шаблон
     function applyTemplate(text, alarm) {
-      if (!text) return ''
-      const a = alarm || {}
+      if (!text || !alarm) return text || ''
+
       return text
-        .replaceAll('{{VIN}}', a.vin || '—')
-        .replaceAll('{{DOGOVOR}}', a.contract || '—')
-        .replaceAll('{{MARKA}}', a.brand || '—')
-        .replaceAll('{{LP}}', a.lessee || '—')
+        .replace(/ТС\s[_\s]+/gi, `ТС ${alarm.brand || '—'} `)
+        .replace(/VIN\s[_\s]+/gi, `VIN ${alarm.vin || '—'} `)
+        .replace(/ДЛ\s[_\s]+/gi, `ДЛ ${alarm.contract || '—'} `)
+        .replace(/ЛП\s[_\s]+/gi, `ЛП ${alarm.lessee || '—'} `)
     }
 
-    // ✅ Выбор шаблона
-    tplSelect.onchange = () => {
-      if (!tplSelect.value) return
-      const tpl = templates.find(t => t.id === tplSelect.value)
-      textarea.value = applyTemplate(tpl?.text || '', currentAlarm)
+
+    function syncFromStore() {
+      const a = getSelectedAlarm()
+      if (!a) return
+
+      currentAlarm = a
+
+      brandEl.textContent = a.brand || '—'
+      vinEl.textContent = a.vin || '—'
+      contractEl.textContent = a.contract || '—'
+
+      const tpl = templates.find(t => t.id === select.value)
+      if (tpl) {
+        textarea.value = applyTemplate(tpl.text, currentAlarm)
+      }
     }
 
-    // ✅ Кнопка "Сформировать сообщение"
-    buildBtn.onclick = () => {
-      if (!tplSelect.value) {
+    select.onchange = () => {
+      const tpl = templates.find(t => t.id === select.value)
+      if (tpl) {
+        textarea.value = applyTemplate(tpl.text, currentAlarm)
+      }
+    }
+
+    btnGenerate.onclick = () => {
+      if (!currentAlarm) {
+        alert('Сначала выберите тревогу двойным кликом')
+        return
+      }
+
+      const tpl = templates.find(t => t.id === select.value)
+      if (!tpl) {
         alert('Выберите шаблон')
         return
       }
-      const tpl = templates.find(t => t.id === tplSelect.value)
-      textarea.value = applyTemplate(tpl?.text || '', currentAlarm)
+
+      textarea.value = applyTemplate(tpl.text, currentAlarm)
     }
 
-    // ✅ Копировать и очистить
-    copyBtn.onclick = async () => {
-      if (!textarea.value.trim()) return
-      try {
-        await navigator.clipboard.writeText(textarea.value)
-        textarea.value = ''
-        alert('Скопировано в буфер обмена')
-      } catch {
-        alert('Не удалось скопировать')
-      }
-    }
-
-    // ✅ Очистить вручную
-    clearBtn.onclick = () => {
+    btnClear.onclick = () => {
       textarea.value = ''
+      select.value = ''
+      brandEl.textContent = '—'
+      vinEl.textContent = '—'
+      contractEl.textContent = '—'
+      setSelectedAlarm(null)
     }
 
-    // ✅ Получение данных по двойному клику из тревог
-    window.addEventListener('alarm:selected', (e) => {
-      const a = e.detail
-      currentAlarm = a
-
-      const set = (id, val) => {
-        const el = document.getElementById(id)
-        if (el) el.textContent = val || '—'
-      }
-
-      set('msg_vin', a.vin)
-      set('msg_contract', a.contract)
-      set('msg_brand', a.brand)
-
-      // если шаблон уже выбран — сразу подставляем
-      if (tplSelect.value) {
-        const tpl = templates.find(t => t.id === tplSelect.value)
-        textarea.value = applyTemplate(tpl?.text || '', currentAlarm)
-      }
+    // ✅ СЛУШАЕМ ДВОЙНЫЕ КЛИКИ ИЗ ТРЕВОГ
+    window.addEventListener('alarm:selected', () => {
+      syncFromStore()
     })
 
-    // ✅ Сборка страницы
+    // если тревога уже выбрана
+    syncFromStore()
+
+    // ===== СБОРКА =====
     root.append(
       title,
-      infoBlock,
-      el('div', { class: 'form-row' }, el('label', {}, 'Выберите шаблон:'), tplSelect),
-      el('div', { class: 'row' }, buildBtn, copyBtn, clearBtn),
-      textarea
+      el('h4', {}, 'Обрабатываемая тревога'),
+      info,
+      el('h4', {}, 'Шаблоны сообщений'),
+      select,
+      textarea,
+      buttons
     )
 
     return root
   }
 }
+
+export default MessagesPage
