@@ -175,3 +175,24 @@ textarea { height: 110px; resize: vertical; }
   box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.08);
 }
 
+.context-menu {
+  position: fixed;
+  background: #1f2f3a;
+  border: 1px solid #3a5668;
+  border-radius: 6px;
+  padding: 4px 0;
+  min-width: 180px;
+  z-index: 10000;
+  box-shadow: 0 6px 20px rgba(0,0,0,.4);
+}
+
+.context-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.context-item:hover {
+  background: #2e4758;
+}
+

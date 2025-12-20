@@ -1,5 +1,9 @@
 import { el } from '../../utils/dom.js'
-import { store } from '../../store.js'
+import {
+  store,
+  setSelectedAlarm,
+  getSelectedAlarm
+} from '../../store.js'
 import { required } from '../../utils/validation.js'
 import { showModal } from '../../utils/modal.js'
 
@@ -9,7 +13,7 @@ function uid() {
 
 export default function AlarmForm() {
   const root = el('div')
-  root.id = 'alarm-form' // <- важно, чтобы другие модули могли найти форму
+  root.id = 'alarm-form'
 
   root.innerHTML = `
     <div>
@@ -21,113 +25,128 @@ export default function AlarmForm() {
       <div class="form-row"><label>❗ Сообщение*:</label><textarea id="message"></textarea></div>
       <div class="form-row"><label>💬 Комментарий:</label><textarea id="comment"></textarea></div>
 
-      <div style="display:flex;gap:8px;margin-top:10px">
+      <div style="display:flex;gap:8px;margin-top:12px">
         <button id="save" class="btn primary">💾 Сохранить тревогу</button>
-        <button id="clear" class="btn" style="background:#ff8a3c;color:#fff">🧹 Очистить форму</button>
+        <button id="clear" class="btn">🧹 Очистить</button>
       </div>
     </div>
   `
 
-  const requiredFields = [
-    { id: 'brand', label: 'Марка' },
-    { id: 'vin', label: 'VIN' },
-    { id: 'contract', label: 'Договор' },
-    { id: 'message', label: 'Сообщение' }
-  ]
+  const requiredFields = ['brand', 'vin', 'contract', 'message']
 
   function clearErrors() {
-    requiredFields.forEach(f => {
-      const input = root.querySelector('#' + f.id)
-      if (!input) return
-      input.classList.remove('input-error')
-      const err = root.querySelector('#' + f.id + '_error')
-      if (err) err.remove()
+    requiredFields.forEach(id => {
+      const el = root.querySelector('#' + id)
+      el?.classList.remove('input-error')
+      root.querySelector('#' + id + '_error')?.remove()
     })
   }
 
-  function validateAndMark() {
+  function validate() {
     let ok = true
-    requiredFields.forEach(f => {
-      const input = root.querySelector('#' + f.id)
-      const val = (input && input.value) ? input.value : ''
-      const errId = f.id + '_error'
-      let errEl = root.querySelector('#' + errId)
-
-      if (!required(val)) {
+    requiredFields.forEach(id => {
+      const input = root.querySelector('#' + id)
+      if (!required(input.value)) {
         ok = false
-        if (input) input.classList.add('input-error')
-        if (!errEl) {
-          errEl = el('div', { id: errId, class: 'input-error-text' })
-          errEl.textContent = `Заполните поле: ${f.label}`
-          if (input) input.insertAdjacentElement('afterend', errEl)
-        } else {
-          errEl.textContent = `Заполните поле: ${f.label}`
+        input.classList.add('input-error')
+        if (!root.querySelector('#' + id + '_error')) {
+          input.insertAdjacentHTML(
+            'afterend',
+            `<div id="${id}_error" class="input-error-text">Обязательное поле</div>`
+          )
         }
-      } else {
-        if (input) input.classList.remove('input-error')
-        if (errEl) errEl.remove()
       }
     })
     return ok
   }
 
-  root.querySelector('#save').addEventListener('click', () => {
+  function clearForm() {
+    root.querySelectorAll('input,textarea').forEach(i => (i.value = ''))
     clearErrors()
-    const ok = validateAndMark()
-    if (!ok) {
-      showModal('⚠️ Не все обязательные поля заполнены', 'Пожалуйста заполните выделенные поля перед сохранением.')
+    setSelectedAlarm(null)
+  }
+
+  // =========================
+  // СОХРАНЕНИЕ
+  // =========================
+  root.querySelector('#save').onclick = () => {
+    clearErrors()
+
+    // ❗ если выбрана тревога — форму НЕ используем для редактирования
+    if (getSelectedAlarm()) {
+      showModal(
+        'Редактирование недоступно',
+        'Редактирование тревоги выполняется через модальное окно.'
+      )
       return
     }
 
-    // сохранение
-    const brand = root.querySelector('#brand').value.trim()
-    const vin = root.querySelector('#vin').value.trim()
-    const contract = root.querySelector('#contract').value.trim()
+    if (!validate()) {
+      showModal('Ошибка', 'Заполните обязательные поля')
+      return
+    }
 
     const alarm = {
       id: uid(),
-      brand,
-      vin,
+      brand: root.querySelector('#brand').value.trim(),
+      vin: root.querySelector('#vin').value.trim(),
       license: root.querySelector('#license').value.trim(),
-      contract,
+      contract: root.querySelector('#contract').value.trim(),
       lessee: root.querySelector('#lessee').value.trim(),
       message: root.querySelector('#message').value.trim(),
-      comment: root.querySelector('#comment').value.trim(),
       timestamp: new Date().toISOString(),
       status: 'open',
       media: [],
       comments: []
     }
 
-    store.addAlarm(alarm)
-
-    // добавить в гараж (если нет)
-    const existing = (store.getState().garage || []).find(g => g.vin === alarm.vin)
-    if (!existing) {
-      store.addToGarage({
-        id: 'g' + alarm.vin,
-        brand: alarm.brand,
-        vin: alarm.vin,
-        license: alarm.license,
-        contract: alarm.contract,
-        lessee: alarm.lessee,
-        year: '',
-        color: '',
-        type: '',
-        notes: '',
-        media: []
+    const comment = root.querySelector('#comment').value.trim()
+    if (comment) {
+      alarm.comments.push({
+        text: comment,
+        at: new Date().toISOString()
       })
-      window.dispatchEvent(new Event('garage:changed'))
     }
 
-    showModal('🟢 Тревога сохранена', 'Запись успешно добавлена.')
-    root.querySelectorAll('input,textarea').forEach(i => i.value = '')
-    window.dispatchEvent(new Event('alarms:changed'))
-  })
+    const duplicate = store.getState().alarms.find(
+      a =>
+        a.status === 'open' &&
+        a.vin === alarm.vin &&
+        a.contract === alarm.contract
+    )
 
-  root.querySelector('#clear').addEventListener('click', () => {
-    root.querySelectorAll('input,textarea').forEach(i => i.value = '')
-    clearErrors()
+    if (duplicate) {
+      showModal('Дубликат', 'Такая активная тревога уже существует')
+      return
+    }
+
+    store.addAlarm(alarm)
+    showModal('Готово', 'Тревога добавлена')
+    clearForm()
+    window.dispatchEvent(new Event('alarms:changed'))
+  }
+
+  root.querySelector('#clear').onclick = clearForm
+
+  // =========================
+  // ДВОЙНОЙ КЛИК → ПОДСТАНОВКА
+  // =========================
+  window.addEventListener('alarm:selected', () => {
+    const a = getSelectedAlarm()
+    if (!a) return
+
+    root.querySelector('#brand').value = a.brand || ''
+    root.querySelector('#vin').value = a.vin || ''
+    root.querySelector('#license').value = a.license || ''
+    root.querySelector('#contract').value = a.contract || ''
+    root.querySelector('#lessee').value = a.lessee || ''
+    root.querySelector('#message').value = a.message || ''
+
+    const lastComment =
+      a.comments && a.comments.length
+        ? a.comments[a.comments.length - 1].text
+        : ''
+    root.querySelector('#comment').value = lastComment
   })
 
   return root
